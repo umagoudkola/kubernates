@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: kotikotideployment
+spec:
+ replicas: 2
+ strategy: 
+    type: Recreate
+ selector: 
+   matchLabels: 
+     app: kotikoti
+ template:
+  metadata:
+   name: kotikotipod
+   labels:
+     app: kotikoti	 
+  spec: 
+    containers:
+    - name: kotikoti
+      image: 258503887566.dkr.ecr.us-east-1.amazonaws.com/koti:latest
+      imagePullPolicy: Always
+      ports:
+      - containerPort: 80

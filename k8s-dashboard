@@ -1,0 +1,65 @@
+Monitoring Kubernetes components
+=================================
+
+
+# add dashboard service
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+
+
+# Dashboard service 
+kubectl get svc -n kubernetes-dashboard
+
+# Change ClusterIP to NodePort
+kubectl get svc -n kubernetes-dashboard -o yaml | sed 's/type: ClusterIP/type: NodePort/' | kubectl replace -f - 
+
+
+
+# Create Service account with admin user
+
+# dashboard-adminuser.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kubernetes-dashboard
+  
+  
+ kubectl create -f dashboard-adminuser.yaml
+
+
+# Bind cluster role binding 
+#myrole.yaml
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: admin-user
+  namespace: kubernetes-dashboard
+
+kubectl create -f myrole.yaml
+
+
+# generating the token 
+
+kubectl -n kubernetes-dashboard create token admin-user
+
+
+# Copy and paste token in dashboard url 
+
+url of Dashboard : https:<IPaddress of master>:<nodeport>
+
+
+# cleanup  Dashboard Service 
+kubectl delete -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+
+
+Reference:
+https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/
+https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md
